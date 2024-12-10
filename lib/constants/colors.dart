@@ -20,4 +20,7 @@ class AppColors {
   static const colorSubText = Color(0xFF6A88AC);
   static const colorBGImageSongAndBGButton = Color(0xFFD5DFFE);
   static const colorTextNameSong = Color(0xFF2C4271);
+  static const colorSliderAndBGPlayButton = Color(0xFF6C7BE8);
+  static const colorShadowNextAndPreviousButton = Color(0xFF7A91FF);
+  static const colorShadowPauseButton = Color(0xFF001FFF);
 }

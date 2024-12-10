@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:musicapp/constants/colors.dart';
 import 'package:musicapp/utils/inner_shadow.dart';
+import 'package:musicapp/widgets/inner_button.dart';
 
 import '../../constants/strings.dart';
 
@@ -172,7 +173,13 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
         ),
-        InnerShadow(
+        InnerButton(
+          withButton: 45,
+          heightButton: 45,
+          iconButton: Icons.favorite,
+          colorIcon: AppColors.colorIconAndText,
+          withIcon: 20,
+          heightIcon: 17,
           shadows: [
             BoxShadow(
               color: Colors.black.withOpacity(0.17),
@@ -184,22 +191,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 blurRadius: 2,
                 offset: const Offset(-2, -2))
           ],
-          child: Container(
-            margin: const EdgeInsets.only(right: 44).w,
-            width: 45.w,
-            height: 45.h,
-            decoration: const BoxDecoration(
-                shape: BoxShape.circle,
-                color: AppColors.colorBGImageSongAndBGButton),
-            child: const SizedBox(
-              width: 20,
-              height: 17,
-              child: Icon(
-                Icons.favorite,
-                color: AppColors.colorIconAndText,
-              ),
-            ),
-          ),
         )
       ],
     );

@@ -6,4 +6,5 @@ class AppStrings {
   static const String textDesOnBoardingFirst =
       'Download songs and albums to listen offline wherever you are.';
   static const String textMyPlaylist = 'My Playlist';
+  static const String textNowPlaying = 'Now Playing';
 }

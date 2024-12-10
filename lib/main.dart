@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:musicapp/ui/bottom_bar/app_main_screen.dart';
+import 'package:musicapp/ui/play_song_screen/play_song_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -16,9 +16,9 @@ class MyApp extends StatelessWidget {
       minTextAdapt: true,
       splitScreenMode: true,
       builder: (_, child) {
-        return MaterialApp(
+        return const MaterialApp(
           debugShowCheckedModeBanner: false,
-          home: AppMainScreen(),
+          home: PlaySongScreen(),
         );
       },
     );
