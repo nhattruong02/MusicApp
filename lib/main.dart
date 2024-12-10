@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-
-import 'ui/on_boarding/on_boarding_screen.dart';
+import 'package:musicapp/ui/bottom_bar/app_main_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -19,7 +18,7 @@ class MyApp extends StatelessWidget {
       builder: (_, child) {
         return MaterialApp(
           debugShowCheckedModeBanner: false,
-          home: OnBoardingScreen(),
+          home: AppMainScreen(),
         );
       },
     );

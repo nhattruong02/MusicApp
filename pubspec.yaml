@@ -13,6 +13,8 @@ dependencies:
   google_fonts: ^6.2.1
   # screenutil
   flutter_screenutil: ^5.9.3
+  # neumorphic Image Song
+
 
   flutter:
     sdk: flutter
