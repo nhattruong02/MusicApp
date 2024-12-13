@@ -13,6 +13,8 @@ class InnerButton extends StatelessWidget {
   final double? withIcon;
   final double? heightIcon;
   List<Shadow>? shadows;
+  final void Function()? function;
+
   InnerButton(
       {required this.withButton,
       required this.heightButton,
@@ -21,23 +23,27 @@ class InnerButton extends StatelessWidget {
       this.withIcon,
       this.heightIcon,
       this.shadows,
-      this.colorBGButton});
+      this.colorBGButton,
+      this.function});
   @override
   Widget build(BuildContext context) {
     return InnerShadow(
       shadows: shadows!,
-      child: Container(
-        width: withButton.w,
-        height: heightButton.h,
-        decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: colorBGButton ?? AppColors.colorBGImageSongAndBGButton),
-        child: SizedBox(
-          width: withIcon!.w,
-          height: heightIcon!.h,
-          child: Icon(
-            iconButton,
-            color: colorIcon,
+      child: GestureDetector(
+        onTap: function,
+        child: Container(
+          width: withButton.w,
+          height: heightButton.h,
+          decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: colorBGButton ?? AppColors.colorBGImageSongAndBGButton),
+          child: SizedBox(
+            width: withIcon!.w,
+            height: heightIcon!.h,
+            child: Icon(
+              iconButton,
+              color: colorIcon,
+            ),
           ),
         ),
       ),

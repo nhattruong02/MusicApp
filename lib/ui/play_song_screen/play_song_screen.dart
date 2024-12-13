@@ -1,23 +1,54 @@
+import 'package:audio_video_progress_bar/audio_video_progress_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:just_audio/just_audio.dart';
 import 'package:musicapp/constants/colors.dart';
 import 'package:musicapp/constants/strings.dart';
 import 'package:musicapp/widgets/inner_button.dart';
 
+import '../../data/model/song.dart';
+import 'audio_player_manager.dart';
+
 class PlaySongScreen extends StatefulWidget {
-  const PlaySongScreen({super.key});
+  final List<Song> listSong;
+  final Song currentSong;
+  const PlaySongScreen(
+      {super.key, required this.listSong, required this.currentSong});
 
   @override
   State<PlaySongScreen> createState() => _PlaySongScreenState();
 }
 
 class _PlaySongScreenState extends State<PlaySongScreen> {
+  late AudioPlayerManager _audioPlayerManager;
+  late int _selectedItemIndex;
+  late Song _song;
+
+  @override
+  void initState() {
+    _song = widget.currentSong;
+    _audioPlayerManager = AudioPlayerManager();
+    _selectedItemIndex = widget.listSong.indexOf(widget.currentSong);
+    if (_audioPlayerManager.songUrl?.compareTo(_song.source!) != 0) {
+      _audioPlayerManager.updateSongUrl(_song.source!);
+      _audioPlayerManager.prepare(isNewSong: true);
+    } else {
+      _audioPlayerManager.prepare(isNewSong: false);
+    }
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
         body: Container(
-          decoration: BoxDecoration(gradient: AppColors.bgGradient),
+          decoration: const BoxDecoration(gradient: AppColors.bgGradient),
           child: Column(
             children: [
               83.verticalSpace,
@@ -59,6 +90,7 @@ class _PlaySongScreenState extends State<PlaySongScreen> {
                   blurRadius: 2,
                   offset: const Offset(-2, -2))
             ],
+            function: () => Navigator.pop(context),
           ),
           Text(
             AppStrings.textNowPlaying,
@@ -118,7 +150,7 @@ class _PlaySongScreenState extends State<PlaySongScreen> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Text(
-          "Cardi B",
+          _song.title!,
           style: TextStyle(
             fontFamily: AppStrings.fontFamilyAmazon,
             fontSize: 18.sp,
@@ -128,7 +160,7 @@ class _PlaySongScreenState extends State<PlaySongScreen> {
         ),
         11.verticalSpace,
         Text(
-          "Invasion Of Privacy",
+          _song.artist!,
           style: TextStyle(
             fontFamily: AppStrings.fontFamilyAmazon,
             fontSize: 18.sp,
@@ -142,18 +174,7 @@ class _PlaySongScreenState extends State<PlaySongScreen> {
 
   Widget _buildMusicLength() {
     return Container(
-      height: 17,
-      margin: EdgeInsets.symmetric(horizontal: 41.h),
-      child: Slider(
-        value: 10,
-        min: 0,
-        max: 15,
-        label: 0.2.round().toString(),
-        activeColor: AppColors.colorSliderAndBGPlayButton,
-        inactiveColor: Colors.white,
-        onChanged: (value) {},
-      ),
-    );
+        margin: EdgeInsets.symmetric(horizontal: 41.h), child: _progressBar());
   }
 
   Widget _buildBottomButtons() {
@@ -181,27 +202,9 @@ class _PlaySongScreenState extends State<PlaySongScreen> {
                   blurRadius: 6,
                   offset: const Offset(-3, -3))
             ],
+            function: () => _setPrevSong(),
           ),
-          InnerButton(
-            withButton: 70,
-            heightButton: 70,
-            iconButton: Icons.pause,
-            heightIcon: 27,
-            withIcon: 46,
-            colorIcon: Colors.white,
-            colorBGButton: AppColors.colorSliderAndBGPlayButton,
-            shadows: [
-              BoxShadow(
-                color: AppColors.colorShadowPauseButton.withOpacity(0.42),
-                blurRadius: 6,
-                offset: const Offset(3, 3),
-              ),
-              BoxShadow(
-                  color: Colors.white.withOpacity(0.27),
-                  blurRadius: 6,
-                  offset: const Offset(-3, -3))
-            ],
-          ),
+          _playButton(),
           InnerButton(
             withButton: 70,
             heightButton: 70,
@@ -221,9 +224,140 @@ class _PlaySongScreenState extends State<PlaySongScreen> {
                   blurRadius: 6,
                   offset: const Offset(-3, -3))
             ],
+            function: () => _setNextSong(),
           ),
         ],
       ),
     );
+  }
+
+  StreamBuilder<DurationState> _progressBar() {
+    return StreamBuilder<DurationState>(
+      stream: _audioPlayerManager.durationState,
+      builder: (context, snapshot) {
+        final durationState = snapshot.data;
+        final progress = durationState?.progress ?? Duration.zero;
+        final buffered = durationState?.buffered ?? Duration.zero;
+        final total = durationState?.total ?? Duration.zero;
+        return ProgressBar(
+          progress: progress,
+          buffered: buffered,
+          total: total,
+          baseBarColor: Colors.white,
+          thumbColor: AppColors.colorSliderAndBGPlayButton,
+          progressBarColor: AppColors.colorSliderAndBGPlayButton,
+          timeLabelLocation: TimeLabelLocation.none,
+          onSeek: _audioPlayerManager.player.seek,
+        );
+      },
+    );
+  }
+
+  StreamBuilder<PlayerState> _playButton() {
+    return StreamBuilder(
+      stream: _audioPlayerManager.player.playerStateStream,
+      builder: (context, snapshot) {
+        final playState = snapshot.data;
+        final processingState = playState?.processingState;
+        final playing = playState?.playing;
+        if (processingState == ProcessingState.loading ||
+            processingState == ProcessingState.buffering) {
+          return CircularProgressIndicator();
+        } else if (playing != true) {
+          return InnerButton(
+            withButton: 70,
+            heightButton: 70,
+            iconButton: Icons.play_arrow_rounded,
+            heightIcon: 27,
+            withIcon: 46,
+            colorIcon: Colors.white,
+            colorBGButton: AppColors.colorSliderAndBGPlayButton,
+            shadows: [
+              BoxShadow(
+                color: AppColors.colorShadowPauseButton.withOpacity(0.42),
+                blurRadius: 6,
+                offset: const Offset(3, 3),
+              ),
+              BoxShadow(
+                  color: Colors.white.withOpacity(0.27),
+                  blurRadius: 6,
+                  offset: const Offset(-3, -3))
+            ],
+            function: () {
+              _audioPlayerManager.player.play();
+            },
+          );
+        } else if (processingState != ProcessingState.completed) {
+          return InnerButton(
+            withButton: 70,
+            heightButton: 70,
+            iconButton: Icons.pause,
+            heightIcon: 27,
+            withIcon: 46,
+            colorIcon: Colors.white,
+            colorBGButton: AppColors.colorSliderAndBGPlayButton,
+            shadows: [
+              BoxShadow(
+                color: AppColors.colorShadowPauseButton.withOpacity(0.42),
+                blurRadius: 6,
+                offset: const Offset(3, 3),
+              ),
+              BoxShadow(
+                  color: Colors.white.withOpacity(0.27),
+                  blurRadius: 6,
+                  offset: const Offset(-3, -3))
+            ],
+            function: () => _audioPlayerManager.player.pause(),
+          );
+        } else {
+          return InnerButton(
+              withButton: 70,
+              heightButton: 70,
+              iconButton: Icons.pause,
+              heightIcon: 27,
+              withIcon: 46,
+              colorIcon: Colors.white,
+              colorBGButton: AppColors.colorSliderAndBGPlayButton,
+              shadows: [
+                BoxShadow(
+                  color: AppColors.colorShadowPauseButton.withOpacity(0.42),
+                  blurRadius: 6,
+                  offset: const Offset(3, 3),
+                ),
+                BoxShadow(
+                    color: Colors.white.withOpacity(0.27),
+                    blurRadius: 6,
+                    offset: const Offset(-3, -3))
+              ],
+              function: () => _audioPlayerManager.player.seek(Duration.zero));
+        }
+      },
+    );
+  }
+
+  void _setNextSong() {
+    ++_selectedItemIndex;
+    if (_selectedItemIndex > widget.listSong.length - 1) {
+      _selectedItemIndex = 0;
+    }
+    final nextSong = widget.listSong[_selectedItemIndex];
+    _audioPlayerManager.updateSongUrl(nextSong.source!);
+    setState(() {
+      _song = nextSong;
+      _audioPlayerManager.prepare(isNewSong: true);
+    });
+  }
+
+  void _setPrevSong() {
+    --_selectedItemIndex;
+    if (_selectedItemIndex < 0) {
+      _selectedItemIndex = widget.listSong.length - 1;
+    }
+    final prevSong = widget.listSong[_selectedItemIndex];
+    _audioPlayerManager.updateSongUrl(prevSong.source!);
+    setState(() {
+      _song = prevSong;
+    });
+    _audioPlayerManager.prepare(isNewSong: true);
   }
 }

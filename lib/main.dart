@@ -1,8 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:musicapp/ui/play_song_screen/play_song_screen.dart';
+import 'package:musicapp/data/repository/repository.dart';
+import 'package:musicapp/ui/bottom_bar/app_main_screen.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  var repository = DefaultRepository();
+  var songs = await repository.loadData();
+  if (songs != null) {
+    for (var song in songs) {
+      debugPrint(song.toString());
+    }
+  }
   runApp(const MyApp());
 }
 
@@ -18,7 +27,7 @@ class MyApp extends StatelessWidget {
       builder: (_, child) {
         return const MaterialApp(
           debugShowCheckedModeBanner: false,
-          home: PlaySongScreen(),
+          home: AppMainScreen(),
         );
       },
     );

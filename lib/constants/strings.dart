@@ -1,5 +1,5 @@
 class AppStrings {
-  static const String imgOnboarding = 'img_onboarding';
+  static const String baseImagePath = 'assets/images/';
   static const String fontFamilyAmazon = 'Amazon Ember';
   static const String textTitleOnBoardingFirst =
       'Discover 70 millions Songs Ad free';

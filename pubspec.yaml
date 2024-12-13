@@ -13,8 +13,14 @@ dependencies:
   google_fonts: ^6.2.1
   # screenutil
   flutter_screenutil: ^5.9.3
-  # neumorphic Image Song
-
+  # http
+  http: ^1.2.2
+  # just audio
+  just_audio: ^0.9.42
+  # rxdart
+  rxdart: ^0.28.0
+  # audio_video_progress_bar
+  audio_video_progress_bar: ^2.0.3
 
   flutter:
     sdk: flutter
@@ -28,7 +34,9 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
+    - assets/songs.json
     - assets/images/
+    - assets/images/icons
   fonts:
     - family: Amazon Ember
       fonts:

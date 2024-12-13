@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:musicapp/constants/colors.dart';
+import 'package:musicapp/ui/home/viewmodel.dart';
+import 'package:musicapp/ui/play_song_screen/audio_player_manager.dart';
+import 'package:musicapp/ui/play_song_screen/play_song_screen.dart';
 import 'package:musicapp/utils/inner_shadow.dart';
 import 'package:musicapp/widgets/inner_button.dart';
 
 import '../../constants/strings.dart';
+import '../../data/model/song.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -14,12 +18,22 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  List<Map<String, String>> listSong = [
-    {'name': 'Get Up 10'},
-    {'name': 'Bickenhead'},
-    {'name': 'Bodak Yellow'},
-    {'name': 'Chance the Rapper'},
-  ];
+  List<Song> songs = [];
+  late MusicAppViewModel _viewModel;
+  @override
+  void initState() {
+    _viewModel = MusicAppViewModel();
+    _viewModel.loadSongs();
+    observeData();
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _viewModel.songStream.close();
+    AudioPlayerManager().dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -117,44 +131,47 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildListSong() {
     return Expanded(
       child: ListView.builder(
-        itemCount: listSong.length,
+        itemCount: songs.length,
         itemBuilder: (context, index) {
+          var song = songs[index];
           return Column(
-            children: [
-              _buildLineSong(listSong[index]['name']),
-              20.verticalSpace
-            ],
+            children: [_buildLineSong(song), 20.verticalSpace],
           );
         },
       ),
     );
   }
 
-  Widget _buildLineSong(String? nameSong) {
+  Widget _buildLineSong(Song song) {
     return Row(
       children: [
-        Container(
-          margin: const EdgeInsets.only(left: 29).w,
-          width: 45,
-          height: 45,
-          decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: AppColors.colorBGImageSongAndBGButton,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.35),
-                  blurRadius: 4,
-                  offset: const Offset(2, 2),
-                ),
-                const BoxShadow(
-                    color: Colors.white, blurRadius: 4, offset: Offset(-2, -2))
-              ]),
-          child: SizedBox(
-            width: 24.w,
-            height: 24.h,
-            child: const Icon(
-              Icons.play_arrow_rounded,
-              color: AppColors.colorIconAndText,
+        GestureDetector(
+          onTap: () => _navigatePlaySongScreen(song),
+          child: Container(
+            margin: const EdgeInsets.only(left: 29).w,
+            width: 45,
+            height: 45,
+            decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: AppColors.colorBGImageSongAndBGButton,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.35),
+                    blurRadius: 4,
+                    offset: const Offset(2, 2),
+                  ),
+                  const BoxShadow(
+                      color: Colors.white,
+                      blurRadius: 4,
+                      offset: Offset(-2, -2))
+                ]),
+            child: SizedBox(
+              width: 24.w,
+              height: 24.h,
+              child: const Icon(
+                Icons.play_arrow_rounded,
+                color: AppColors.colorIconAndText,
+              ),
             ),
           ),
         ),
@@ -163,7 +180,8 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Container(
             margin: const EdgeInsets.symmetric(horizontal: 25).w,
             child: Text(
-              nameSong!,
+              song.title!,
+              overflow: TextOverflow.ellipsis,
               style: TextStyle(
                 fontFamily: AppStrings.fontFamilyAmazon,
                 fontSize: 23.sp,
@@ -173,26 +191,48 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
         ),
-        InnerButton(
-          withButton: 45,
-          heightButton: 45,
-          iconButton: Icons.favorite,
-          colorIcon: AppColors.colorIconAndText,
-          withIcon: 20,
-          heightIcon: 17,
-          shadows: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.17),
-              blurRadius: 2,
-              offset: const Offset(2, 2),
-            ),
-            BoxShadow(
-                color: Colors.white.withOpacity(0.49),
+        Container(
+          margin: const EdgeInsets.only(right: 44).w,
+          child: InnerButton(
+            withButton: 45,
+            heightButton: 45,
+            iconButton: Icons.favorite,
+            colorIcon: AppColors.colorIconAndText,
+            withIcon: 20,
+            heightIcon: 17,
+            shadows: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.17),
                 blurRadius: 2,
-                offset: const Offset(-2, -2))
-          ],
+                offset: const Offset(2, 2),
+              ),
+              BoxShadow(
+                  color: Colors.white.withOpacity(0.49),
+                  blurRadius: 2,
+                  offset: const Offset(-2, -2))
+            ],
+          ),
         )
       ],
     );
+  }
+
+  void observeData() {
+    _viewModel.songStream.stream.listen(
+      (listSong) {
+        setState(() {
+          songs.addAll(listSong);
+        });
+      },
+    );
+  }
+
+  void _navigatePlaySongScreen(Song song) {
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) =>
+              PlaySongScreen(listSong: songs, currentSong: song),
+        ));
   }
 }

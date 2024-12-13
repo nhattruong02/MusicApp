@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:musicapp/constants/images.dart';
 import 'package:musicapp/constants/strings.dart';
 import 'package:musicapp/widgets/load_image_asset.dart';
 
@@ -23,7 +24,7 @@ class OnBoardingScreen extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(top: 83, left: 30, right: 29).w,
       child: LoadImageAsset(
-        imageName: AppStrings.imgOnboarding,
+        imageName: AppImages.imgOnboarding,
         width: 369,
         height: 361,
         boxFit: BoxFit.fill,
